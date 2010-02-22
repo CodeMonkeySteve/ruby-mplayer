@@ -5,7 +5,7 @@ class Mplayer
 
   Track = Struct.new :path, :length, :title
 
-  @@MPlayerBin = '/usr/bin/mplayer'
+  @@MPlayerBin = ['/usr/bin/mplayer', '/usr/local/bin/mplayer']
 
   attr_accessor :playlist
 
@@ -16,8 +16,20 @@ class Mplayer
   def track()    @track    end
   def pos()      @pos      end
 
+  def has_valid_mplayer_binary?
+    valid = false
+    @@MPlayerBin.each do |bin|
+      if !valid
+        if FileTest.exists?(bin) and FileTest.executable?(bin)
+          valid = true
+        end
+      end
+    end
+    return valid
+  end
+
   def initialize( opts = '' )
-    raise "Can't run MPlayer binary (#{@@MPlayerBin})"  unless FileTest.exists?(@@MPlayerBin) and FileTest.executable?(@@MPlayerBin)
+    raise "Can't run MPlayer binary (#{@@MPlayerBin})"  unless has_valid_mplayer_binary?
 
     @stopped, @paused, @loaded = true, false, false
     @playlist = []

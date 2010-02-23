@@ -1,0 +1,12 @@
+== ruby-mplayer - Ruby wrapper for MPlayer
+
+== Usage
+Sample usage:
+  require 'mplayer'
+  mplayer = Mplayer.new
+  mplayer.play(path_to_a_song.ogg)
+
+== Todo
+
+  - Function to send raw text and return returning text if any
+  - Rewrite Track function to use get_meta_* get_file_name etc..

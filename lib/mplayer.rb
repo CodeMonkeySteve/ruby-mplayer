@@ -17,23 +17,17 @@ class Mplayer
   def pos()      @pos      end
 
   def has_valid_mplayer_binary?
-    valid = false
-    @@MPlayerBin.each do |bin|
-      if !valid
-        if FileTest.exists?(bin) and FileTest.executable?(bin)
-          valid = true
-        end
-      end
+    @mplayer_bin = @@MPlayerBin.detect do |bin|
+      FileTest.exists?(bin) && FileTest.executable?(bin)
     end
-    return valid
   end
 
   def initialize( opts = '' )
-    raise "Can't run MPlayer binary (#{@@MPlayerBin})"  unless has_valid_mplayer_binary?
+    raise "Can't run MPlayer binary (#{@@MPlayerBin})" unless has_valid_mplayer_binary?
 
     @stopped, @paused, @loaded = true, false, false
     @playlist = []
-    @io = IO.popen "mplayer -noconsolecontrols -idle -slave #{opts} 2>&1", 'r+'
+    @io = IO.popen "#{@mplayer_bin} -noconsolecontrols -idle -slave #{opts} 2>&1", 'r+'
     @io_queue = Queue.new
     @io_thread = Thread.new(self) { |p|  p.read_thread }
     @io_log = []

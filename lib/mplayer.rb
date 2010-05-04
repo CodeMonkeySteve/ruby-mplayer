@@ -32,7 +32,7 @@ class Mplayer
     @io_thread = Thread.new(self) { |p|  p.read_thread }
     @io_log = []
     ObjectSpace.define_finalizer self, Mplayer.create_finalizer(self)
-    expect ['MPlayer', 'CPU:']
+    expect 'MPlayer'
   end
 
   def on_track_end( track, pos )

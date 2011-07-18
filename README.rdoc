@@ -10,3 +10,6 @@ Sample usage:
   - Function to send raw text and return returning text if any
   - Rewrite Track function to use get_meta_* get_file_name etc..
   - Add more usage example
+
+Website::   http://github.com/CodeMonkeySteve/ruby-mplayer
+License::   MIT

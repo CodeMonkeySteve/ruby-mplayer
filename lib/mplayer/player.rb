@@ -71,6 +71,10 @@ class MPlayer::Player
     @io.send(:trigger_event, :track_end, track)
   end
 
+  def volume=(val)
+    volume!(val, 1)
+  end
+
   def method_missing(method, *args, &blk)
     return @io.send(method, *args, &blk)  if @io.respond_to?(method)
     method = method.to_s

@@ -7,7 +7,7 @@ module MPlayer::IO
 
   Events = [:track_start, :pos_change, :paused, :track_end].freeze
 
-  attr_reader :track, :pos
+  attr_reader :track, :pos, :volume
 
   def loaded?()   @loaded                           end
   def stopped?()  @stopped                          end
@@ -18,6 +18,7 @@ module MPlayer::IO
 
   def initialize
     @stopped, @paused, @loaded = true, false, false
+    @volume = @track = @pos = nil
     @event_callbacks = {}
     @lt2_delimiter = %r{[\r\n]}
     @lt2_delimiter.define_singleton_method(:length) { 1 }
@@ -33,8 +34,9 @@ module MPlayer::IO
   def as_json
     {
       status: status,
-      pos: pos,
       track: track && track.as_json,
+      pos: pos,
+      volume: volume
     }
   end
 
@@ -84,6 +86,7 @@ debug "< #{ln.inspect}"  unless ln.start_with?('A:')
           trigger_event :pos_change, @pos
         end
 
+      when %r{Volume: \s*(\d+)\s*%}     then  @volume = $1.to_i
       when %r{(Title|Name): (.*)\s*$}   then  @track.title = $2
       when %r{Artist: (.*)\s*$}         then  @track.artist = $1
       when %r{Album: (.*)\s*$}          then  @track.album = $1

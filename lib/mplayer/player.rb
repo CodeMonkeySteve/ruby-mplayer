@@ -31,14 +31,17 @@ class MPlayer::Player
     expect "Mute: #{state ? 'enabled' : 'disabled'}"
   end
 
-  def play( path = nil, opts = {} )
-    path ||= @playlist.shift    unless path
-    return false  unless path
+  def play( track = nil, opts = {} )
+    track ||= @playlist.first
+    track =
+         if track.is_a?(String)      then track
+      elsif track.respond_to?(:url)  then track.url
+      elsif track.respond_to?(:path) then track.path
+      end
+    return false unless track
 
     @loaded = false
-    raise "File not found: #{path}"  unless FileTest.exists? path
-
-    send_data "loadfile \"#{path}\" 0\n"
+    send_data "loadfile \"#{track}\" 0\n"
     pause!  if opts[:paused] or opts[:muted]
 
     m = expect(%r{(starting playback)|(failed to open)}i)
@@ -72,7 +75,10 @@ class MPlayer::Player
   end
 
   def volume=(val)
+    return if val == volume
+    old_vol = volume
     volume!(val, 1)
+    wait_for { volume != old_vol }
   end
 
   def method_missing(method, *args, &blk)
@@ -97,11 +103,6 @@ protected
     @mplayer_bin ||= BinPaths.find do |bin|
       FileTest.exists?(bin) && FileTest.executable?(bin)
     end
-  end
-
-  def when_track_ends( track )
-debug "end #{track.inspect}"
-    play  unless stopped?
   end
 
   def self.create_finalizer(player)

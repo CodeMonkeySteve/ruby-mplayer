@@ -80,7 +80,7 @@ debug "< #{ln.inspect}"  unless ln.start_with?('A:')
           @track.length = len
           @loaded = true
         end
-        @track.length = pos  if pos > @track.length
+        @track.length = pos  if @track && (pos > @track.length)
         if @pos != pos
           @pos = pos
           trigger_event :pos_change, @pos
@@ -137,7 +137,9 @@ protected
     event = event.to_sym
     raise "Unknown event: #{event}"  unless @event_callbacks.include?(event)
 debug "event: #{event}(#{args.map(&:inspect).join(', ')})"  if event != :pos_change
-    @event_callbacks[event].each { |ev|  ev.call(*args) }
+    Fiber.new do |callbacks, args|
+      callbacks.each { |ev|  ev.call(*args) }
+    end.resume(@event_callbacks[event], args)
   end
 
   def debug( str )
